@@ -1,4 +1,3 @@
-cvxpy
 joblib
 matplotlib
 numpy
@@ -11,3 +10,4 @@ streamlit
 xgboost
 streamlit
 jsonschema
+cvxpy
