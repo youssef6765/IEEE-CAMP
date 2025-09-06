@@ -12,19 +12,19 @@ import joblib
 import json
 
 # Save the trained model
-model = joblib.load("Model/xgb_model.pkl")
+model = joblib.load("../Model/xgb_model.pkl")
 
-with open("Model/model_metrics.json", "r") as f:
+with open("../Model/model_metrics.json", "r") as f:
     metrics = json.load(f)
 
-with open("Model/model_params.json", "r") as f:
+with open("../Model/model_params.json", "r") as f:
     params = json.load(f)
 
 mse = metrics["mse"]
 r2 = metrics["r2"]
 accuracy = metrics["accuracy"]
-pred_df = pd.read_csv("Model/predictions.csv")
-feature_importance = pd.read_csv("Model/feature_importance.csv")
+pred_df = pd.read_csv("../Model/predictions.csv")
+feature_importance = pd.read_csv("../Model/feature_importance.csv")
 
 # Extract key params only (to keep it minimal in UI)
 key_params = {
@@ -37,7 +37,7 @@ key_params = {
 }
 
 
-df = pd.read_csv("Data/Processed_Resource_utilization.csv")
+df = pd.read_csv("../Data/Processed_Resource_utilization.csv")
 
 # Page Title
 st.set_page_config(page_title="IEEE Dashboard", layout="wide")
@@ -178,7 +178,7 @@ with tab3:
     st.header("Resource Allocation Optimization")
 
     # Load dataset
-    df = pd.read_csv("Predicted_Resource_utilization.csv")
+    df = pd.read_csv("../Data/Predicted_Resource_utilization.csv")
 
     y_pred = df['predicted_workload'].values[:50]  
     cpu = df["cpu_utilization"].values[:50]
