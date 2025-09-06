@@ -3,5 +3,4 @@ seaborn
 pandas
 plotly
 joblib
-cvxpy
 numpy
