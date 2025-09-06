@@ -1,13 +1,8 @@
-joblib
+streamlit
 matplotlib
-numpy
+seaborn
 pandas
 plotly
-scikit-learn
-scipy
-seaborn
-streamlit
-xgboost
-streamlit
-jsonschema
+joblib
 cvxpy
+numpy
