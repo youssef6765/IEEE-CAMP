@@ -1,0 +1,13 @@
+cvxpy
+joblib
+matplotlib
+numpy
+pandas
+plotly
+scikit-learn
+scipy
+seaborn
+streamlit
+xgboost
+streamlit
+jsonschema
