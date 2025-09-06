@@ -1,0 +1,16 @@
+Feature,Importance
+cpu_utilization,0.51735854
+hour_of_day,0.18024006
+memory_usage,0.11870251
+workload_lag_1,0.029104086
+workload_lag_2,0.029017096
+cpu_utilization_lag_2,0.023319103
+workload_lag_3,0.022434775
+cpu_utilization_lag_3,0.022287102
+cpu_utilization_lag_1,0.022108877
+storage_usage,0.019484932
+day_index,0.015942886
+workload_expanding_mean,0.0
+workload_rolling_std_3,0.0
+workload_rolling_mean_3,0.0
+cpu_utilization_expanding_mean,0.0
