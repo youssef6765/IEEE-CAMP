@@ -9,9 +9,33 @@ import cvxpy as cp
 import numpy as np
 import pandas as pd
 import joblib
+import json
 
-# load model
-model = joblib.load("workload_model.pkl")
+# Save the trained model
+model = joblib.load("xgb_model.pkl")
+
+with open("model_metrics.json", "r") as f:
+    metrics = json.load(f)
+
+with open("model_params.json", "r") as f:
+    params = json.load(f)
+
+mse = metrics["mse"]
+r2 = metrics["r2"]
+accuracy = metrics["accuracy"]
+pred_df = pd.read_csv("predictions.csv")
+feature_importance = pd.read_csv("feature_importance.csv")
+
+# Extract key params only (to keep it minimal in UI)
+key_params = {
+    "n_estimators": params["n_estimators"],
+    "max_depth": params["max_depth"],
+    "learning_rate": params["learning_rate"],
+    "subsample": params["subsample"],
+    "colsample_bytree": params["colsample_bytree"],
+    "objective": params["objective"]
+}
+
 
 df = pd.read_csv("Processed_Resource_utilization.csv")
 
@@ -25,7 +49,27 @@ tab1, tab2, tab3, tab4 = st.tabs(["📊 Visualization", "🤖 Prediction", "⚙�
 with tab1:
     st.header("Visualization")
 
-   # --- Correlation Matrix ---
+    # --- Time-Series Trends ---
+    st.subheader("Resource Trends Over Time")
+
+    fig = px.line(df, x='timestamp', y='Resource Allocation',
+                  title='Resource Allocation Over Time', width=800, height=400)
+    st.plotly_chart(fig)
+
+    fig = px.line(df, x='timestamp', y='cpu_utilization',
+                  title='CPU Utilization Over Time', width=800, height=400)
+    st.plotly_chart(fig)
+
+    fig = px.line(df, x='timestamp', y='memory_usage',
+                  title='Memory Usage Over Time', width=800, height=400)
+    st.plotly_chart(fig)
+
+    fig = px.line(df, x='timestamp', y='storage_usage',
+                  title='Storage Usage Over Time', width=800, height=400)
+    st.plotly_chart(fig)
+
+    # --- Correlation Matrix ---
+    st.subheader("Correlation Analysis")
     corr_matrix = df[['workload', 'Resource Allocation', 'cpu_utilization', 'memory_usage', 'storage_usage']].corr()
     fig = ff.create_annotated_heatmap(
         z=corr_matrix.values,
@@ -39,6 +83,7 @@ with tab1:
     st.plotly_chart(fig)
 
     # --- Scatterplots ---
+    st.subheader("Resource Allocation vs Metrics")
     metrics = ['cpu_utilization', 'memory_usage', 'storage_usage', 'workload']
     for metric in metrics:
         fig = px.scatter(
@@ -49,6 +94,7 @@ with tab1:
         st.plotly_chart(fig)
 
     # --- Storage Usage Distribution ---
+    st.subheader("Distribution Analysis")
     fig = px.histogram(
         df, x="storage_usage", nbins=30, color_discrete_sequence=['skyblue'],
         title="Distribution of Storage Usage", width=500, height=400
@@ -89,10 +135,43 @@ with tab1:
     st.plotly_chart(fig)
     st.write(df['workload'].describe())
 
+
 # --- Prediction Tab ---
 with tab2:
-    st.header("Predict Workload")
+    st.header("Prediction Results")
 
+    st.markdown(f"""
+    **Model Used:** XGBoost Regressor  
+
+    **Key Parameters:**  
+    - n_estimators = {key_params['n_estimators']}  
+    - max_depth = {key_params['max_depth']}  
+    - learning_rate = {key_params['learning_rate']}  
+    - subsample = {key_params['subsample']}  
+    - colsample_bytree = {key_params['colsample_bytree']}  
+    - objective = {key_params['objective']}  
+
+    **Preprocessing:**  
+    - StandardScaler applied to features  
+    - Train-test split: 80% train, 20% test  
+    - Feature engineering: lag features, rolling mean/std, expanding mean
+    """)
+
+    st.subheader("Model Performance")
+    st.write(f"**Mean Squared Error (MSE):** {mse:.4f}")
+    st.write(f"**R² Score:** {r2:.4f}")
+    st.write(f"**Accuracy (model.score):** {accuracy:.4f}")
+    st.subheader("Predicted vs Actual Workload")
+    fig = px.line(pred_df, x="timestamp", y=["Actual", "Predicted"],
+                labels={"value": "Workload", "timestamp": "Time"},
+                title="Workload Prediction Over Time", width=800, height=400)
+    st.plotly_chart(fig)
+
+    # --- Feature Importance ---
+    st.subheader("Feature Importance")
+    fig = px.bar(feature_importance, x="Importance", y="Feature", orientation="h",
+                title="Feature Importance", width=600, height=400)
+    st.plotly_chart(fig)
 
 # --- Optimization Tab ---
 with tab3:
@@ -114,7 +193,7 @@ with tab3:
 
     alloc = cp.sum(x, axis=1)
 
-    capacity_limit = 0.7 * cpu + 0.5 * memory + 0.3 * storage
+    capacity_limit = 0.7 * cpu + 0.5 * memory + 0.7 * storage
 
     objective = cp.Maximize(cp.sum(alloc))
 
@@ -157,19 +236,23 @@ with tab4:
     st.header("Operational Insights")
 
     st.markdown("""
-    **Observations from data:**
-    - CPU utilization is often very high when workload reaches 100, but resource allocation is still less than demand.
-    - Memory usage is mostly below 85%, indicating spare capacity.
+    **Key Observations from Data:**
+    - Workload frequently reaches 100, causing **very high CPU utilization**, while resource allocation remains below actual demand.
+    - **Memory usage stays mostly under 85%**, showing it is not the limiting factor.
+    - Storage usage patterns indicate that sustained performance depends on efficient data handling.
 
     **Implications:**
-    - CPU is a bottleneck during peak demand.
-    - Memory is underutilized, leading to inefficient resource usage.
+    - The service relies **heavily on CPU and storage capacity** rather than memory.
+    - CPU is the primary bottleneck during peak demand, directly affecting workload handling.
+    - Advanced and optimized CPUs significantly improve the system’s ability to process workloads.
+    - Underutilized memory suggests potential for rebalancing resources.
 
     **Recommendations for Cloud Environment:**
-    1. Implement **CPU auto-scaling** to dynamically allocate resources based on predicted workload or CPU thresholds.
-    2. Utilize underused memory by adjusting workloads or selecting better-balanced instance types.
-    3. Use **predictive allocation** leveraging workload forecasts to provision resources ahead of peak demand.
-    4. Introduce **resource prioritization** to ensure critical workloads receive CPU first.
-    5. Set up **monitoring and alerts** to scale resources proactively.
-    6. Optimize costs by combining reserved instances with autoscaling for peak loads.
+    1. Implement **CPU-focused auto-scaling** to dynamically add processing power during workload spikes.
+    2. Invest in **newer, higher-performance CPUs** to boost workload throughput and efficiency.
+    3. Optimize **storage allocation and I/O performance** to complement CPU improvements.
+    4. Reallocate workloads or select **CPU- and storage-optimized instance types** rather than memory-heavy ones.
+    5. Use **predictive workload forecasting** for proactive provisioning of CPU and storage resources.
+    6. Set up **intelligent monitoring and alerts** to detect CPU saturation early and trigger scaling.
+    7. Control costs by combining **reserved instances for baseline CPU/storage demand** with auto-scaling for peaks.
     """)
