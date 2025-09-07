@@ -185,7 +185,7 @@ with tab3:
     storage = df["storage_usage"].values[:50]
 
     T = len(y_pred)
-    resources = ["small", "medium", "large"]
+    resources = ["total_allocation"]
     R = len(resources)
 
     x = cp.Variable((T, R), integer=True)
@@ -211,7 +211,6 @@ with tab3:
     if x.value is not None:
         x_opt = np.rint(x.value).astype(int)
         alloc_df = pd.DataFrame(x_opt, columns=resources)
-        alloc_df["total_allocation"] = alloc_df[resources].sum(axis=1)
         alloc_df["predicted_demand"] = y_pred
         alloc_df["served_demand"] = np.minimum(alloc_df["total_allocation"], y_pred)
 
@@ -229,7 +228,6 @@ with tab3:
 
     else:
         st.error(f"Solver failed: {prob.status}")
-
 # --- Insights Tab ---
 with tab4:
     st.header("Operational Insights")
