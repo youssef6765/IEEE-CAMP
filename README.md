@@ -141,11 +141,14 @@ IEEE-CAMP/
 │   │   ├── model_params.json                       # Model hyperparameters
 │   │   ├── predictions.csv                         # Actual vs. predicted workload
 │   │   └── feature_importance.csv                  # Feature importance scores
-│   ├── 1-Data_preprocessing.ipynb                  # Preprocessing notebook
-│   ├── 3-Model.ipynb                               # Modeling and prediction notebook
-│   ├── 4-Optmization.ipynb                         # Optimization notebook
-│   ├── app.py                                      # Streamlit dashboard
-│   ├── requirements.txt                            # Dependencies
+|   ├── Notebooks/
+│   │   ├── 1-Data_preprocessing.ipynb                  # Preprocessing notebook
+|   |   ├── 2-Data_Visulaization.ipynb                  # Visualization notebook
+│   │   ├── 3-Model.ipynb                               # Modeling and prediction notebook
+│   │   ├── 4-Optmization.ipynb                         # Optimization notebook
+|   ├── Web app/
+│   │   ├── app.py                                      # Streamlit dashboard
+│   │   ├── requirements.txt                            # Dependencies
 │   └── README.md                                   # This file
 ```
 
