@@ -1,5 +1,4 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import plotly.express as px
@@ -12,19 +11,19 @@ import joblib
 import json
 
 # Save the trained model
-model = joblib.load("Model/xgb_model.pkl")
+model = joblib.load("../Model/xgb_model.pkl")
 
-with open("Model/model_metrics.json", "r") as f:
+with open("../Model/model_metrics.json", "r") as f:
     metrics = json.load(f)
 
-with open("Model/model_params.json", "r") as f:
+with open("../Model/model_params.json", "r") as f:
     params = json.load(f)
 
 mse = metrics["mse"]
 r2 = metrics["r2"]
 accuracy = metrics["accuracy"]
-pred_df = pd.read_csv("Model/predictions.csv")
-feature_importance = pd.read_csv("Model/feature_importance.csv")
+pred_df = pd.read_csv("../Model/predictions.csv")
+feature_importance = pd.read_csv("../Model/feature_importance.csv")
 
 # Extract key params only (to keep it minimal in UI)
 key_params = {
@@ -37,7 +36,7 @@ key_params = {
 }
 
 
-df = pd.read_csv("Data/Processed_Resource_utilization.csv")
+df = pd.read_csv("../Data/Processed_Resource_utilization.csv")
 
 # Page Title
 st.set_page_config(page_title="IEEE Dashboard", layout="wide")
@@ -178,7 +177,7 @@ with tab3:
     st.header("Resource Allocation Optimization")
 
     # Load dataset
-    df = pd.read_csv("Predicted_Resource_utilization.csv")
+    df = pd.read_csv("../Data/Predicted_Resource_utilization.csv")
 
     y_pred = df['predicted_workload'].values[:50]  
     cpu = df["cpu_utilization"].values[:50]
@@ -186,7 +185,7 @@ with tab3:
     storage = df["storage_usage"].values[:50]
 
     T = len(y_pred)
-    resources = ["small", "medium", "large"]
+    resources = ["total_allocation"]
     R = len(resources)
 
     x = cp.Variable((T, R), integer=True)
@@ -212,7 +211,6 @@ with tab3:
     if x.value is not None:
         x_opt = np.rint(x.value).astype(int)
         alloc_df = pd.DataFrame(x_opt, columns=resources)
-        alloc_df["total_allocation"] = alloc_df[resources].sum(axis=1)
         alloc_df["predicted_demand"] = y_pred
         alloc_df["served_demand"] = np.minimum(alloc_df["total_allocation"], y_pred)
 
@@ -230,7 +228,6 @@ with tab3:
 
     else:
         st.error(f"Solver failed: {prob.status}")
-
 # --- Insights Tab ---
 with tab4:
     st.header("Operational Insights")
