@@ -1,5 +1,5 @@
 # IEEE Project
-# Resource Utilization Prediction, Optimization, and Visualization For Cloud Services (Supply Chain Problem)
+# Resource Utilization Prediction, Optimization, and Visualization For Cloud Services 
 
 This repository contains a comprehensive pipeline for analyzing, predicting, optimizing, and visualizing resource utilization in a computing environment. The project processes historical data on CPU, memory, storage, and workload, uses machine learning to predict future workload, applies optimization techniques for efficient resource allocation, and provides an interactive dashboard for data visualization and insights. The project is built using Python, with Jupyter notebooks for data processing, modeling, optimization, and visualization, and a Streamlit app for the user interface.
 
